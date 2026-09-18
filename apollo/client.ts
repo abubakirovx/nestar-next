@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ApolloClient, ApolloLink, InMemoryCache, split, from, NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, ApolloLink, InMemoryCache, split, from, NormalizedCacheObject, createHttpLink } from '@apollo/client';
 import createUploadLink from 'apollo-upload-client/public/createUploadLink.js';
 import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
@@ -104,8 +104,6 @@ export function useApollo(initialState: any) {
 	return useMemo(() => initializeApollo(initialState), [initialState]);
 }
 
-/**
-import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 
 // No Subscription required for develop process
 
@@ -119,4 +117,4 @@ const client = new ApolloClient({
 });
 
 export default client;
-*/
+
