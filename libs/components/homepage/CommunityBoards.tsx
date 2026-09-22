@@ -16,6 +16,8 @@ const CommunityBoards = () => {
 	const [freeArticles, setFreeArticles] = useState<BoardArticle[]>([]);
 
 	/** APOLLO REQUESTS **/
+	/** HANDLERS **/
+
 
 	if (device === 'mobile') {
 		return <div>COMMUNITY BOARDS (MOBILE)</div>;
