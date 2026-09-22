@@ -85,6 +85,12 @@ const Top = () => {
 		}
 	};
 
+	useEffect(() => {
+		window.addEventListener('scroll', changeNavbarColor);
+
+		return () => window.removeEventListener('scroll', changeNavbarColor);
+	}, []);
+
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
@@ -134,10 +140,6 @@ const Top = () => {
 			},
 		},
 	}));
-
-	if (typeof window !== 'undefined') {
-		window.addEventListener('scroll', changeNavbarColor);
-	}
 
 	if (device == 'mobile') {
 		return (
