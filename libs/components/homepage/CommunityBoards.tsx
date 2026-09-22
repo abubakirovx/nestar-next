@@ -48,6 +48,7 @@ const CommunityBoards = () => {
 	});
 
 	/** HANDLERS **/
+	
 
 	if (device === 'mobile') {
 		return <div>COMMUNITY BOARDS (MOBILE)</div>;
