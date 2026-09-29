@@ -6,11 +6,11 @@ import PropertyBigCard from '../../libs/components/common/PropertyBigCard';
 import ReviewCard from '../../libs/components/agent/ReviewCard';
 import { Box, Button, Pagination, Stack, Typography } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
-import { useReactiveVar } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { Property } from '../../libs/types/property/property';
 import { Member } from '../../libs/types/member/member';
-import { sweetErrorHandling } from '../../libs/sweetAlert';
+import { sweetErrorHandling, sweetMixinErrorAlert } from '../../libs/sweetAlert';
 import { userVar } from '../../apollo/store';
 import { PropertiesInquiry } from '../../libs/types/property/property.input';
 import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
@@ -18,6 +18,11 @@ import { Comment } from '../../libs/types/comment/comment';
 import { CommentGroup } from '../../libs/enums/comment.enum';
 import { REACT_APP_API_URL } from '../../libs/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GET_COMMENTS, GET_MEMBER, GET_PROPERTIES } from '../../apollo/user/query';
+import { T } from '../../libs/types/common';
+import { CREATE_COMMENT, LIKE_TARGET_PROPERTY } from '../../apollo/user/mutation';
+import property from '../property';
+import { Direction, Message } from '../../libs/enums/common.enum';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -29,7 +34,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const [mbId, setMbId] = useState<string | null>(null);
+	const [agentId, setAgentId] = useState<string | null>(null);
 	const [agent, setAgent] = useState<Member | null>(null);
 	const [searchFilter, setSearchFilter] = useState<PropertiesInquiry>(initialInput);
 	const [agentProperties, setAgentProperties] = useState<Property[]>([]);
@@ -44,9 +49,78 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	});
 
 	/** APOLLO REQUESTS **/
+	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+	const [createComment] = useMutation(CREATE_COMMENT);
+
+	const {
+		loading: getMemberLoading,
+		error: getMemberError,
+		data: getMemberData,
+		refetch: getMemberRefetch,
+	} = useQuery(GET_MEMBER, {
+		fetchPolicy: 'network-only',
+		variables: { input: agentId },
+		skip: !agentId,
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setAgent(data?.getMember);
+			setSearchFilter({
+				...searchFilter,
+				search: {
+					memberId: data?.getMember?._id,
+				},
+			});
+			setCommentInquiry({
+				...commentInquiry,
+				search: {
+					commentRefId: data?.getMember?._id,
+				},
+			});
+			setInsertCommentData({
+				...insertCommentData,
+				commentRefId: data?.getMember?._id,
+			});
+		},
+	});
+
+	const {
+		loading: getPropertiesLoading,
+		error: getPropertiesError,
+		data: getPropertiesData,
+		refetch: getPropertiesRefetch,
+	} = useQuery(GET_PROPERTIES, {
+		fetchPolicy: 'network-only',
+		variables: {
+			input: searchFilter,
+		},
+		skip: !searchFilter.search.memberId,
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setAgentProperties(data?.getProperties?.list);
+			setPropertyTotal(data?.getAgents?.metaCounter[0]?.total ?? 0);
+		},
+	});
+
+	const {
+		loading: getCommentsLoading,
+		error: getCommentsError,
+		data: getCommentsData,
+		refetch: getCommentsRefetch,
+	} = useQuery(GET_COMMENTS, {
+		fetchPolicy: 'cache-and-network',
+		variables: {
+			input: commentInquiry,
+		},
+		skip: !commentInquiry?.search?.commentRefId,
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setAgentComments(data?.getComments?.list);
+			setCommentTotal(data?.getComments?.metaCounter[0]?.total ?? 0);
+		},
+	});
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (router.query.agentId) setMbId(router.query.agentId as string);
+		if (router.query.agentId) setAgentId(router.query.agentId as string);
 	}, [router]);
 
 	useEffect(() => {}, [searchFilter]);
@@ -74,8 +148,26 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 
 	const createCommentHandler = async () => {
 		try {
+			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
+			if (user._id === agentId) throw new Error('Cannot write a review for yourself!');
+			await createComment({ variables: { input: insertCommentData } });
+
+			setInsertCommentData({ ...insertCommentData, commentContent: '' });
+
+			getCommentsRefetch({ input: commentInquiry });
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
+		}
+	};
+	const likePropertyHandler = async (user: T, id: string) => {
+		try {
+			if (!id) return;
+			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
+			await likeTargetProperty({ variables: { input: id } });
+			await getPropertiesRefetch({ input: searchFilter });
+		} catch (err: any) {
+			console.log('ERROR, likePropertyHandler', err.message);
+			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
@@ -103,7 +195,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 							{agentProperties.map((property: Property) => {
 								return (
 									<div className={'wrap-main'} key={property?._id}>
-										<PropertyBigCard property={property} key={property?._id} />
+										<PropertyBigCard likePropertyHandler={likePropertyHandler} property={property} key={property?._id} />
 									</div>
 								);
 							})}
@@ -127,7 +219,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 							) : (
 								<div className={'no-data'}>
 									<img src="/img/icons/icoAlert.svg" alt="" />
-									<p>No agents found!</p>
+									<p>No property found!</p>
 								</div>
 							)}
 						</Stack>
@@ -146,7 +238,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 									</span>
 								</Box>
 								{agentComments?.map((comment: Comment) => {
-									return <ReviewCard comment={comment} key={comment?._id} />;
+									return <ReviewCard  comment={comment} key={comment?._id} />;
 								})}
 								<Box component={'div'} className={'pagination-box'}>
 									<Pagination

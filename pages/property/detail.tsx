@@ -159,17 +159,6 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
 			await likeTargetProperty({ variables: { input: id } });
 			await getPropertyRefetch({ input: id });
-			await getPropertiesRefetch({
-				input: {
-					page: 1,
-					limit: 4,
-					sort: 'createdAt',
-					direction: Direction.DESC,
-					search: {
-						locationList: property?.propertyLocation ? [property?.propertyLocation] : [],
-					},
-				},
-			});
 		} catch (err: any) {
 			console.log('ERROR, likePropertyHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
