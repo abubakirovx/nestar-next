@@ -164,7 +164,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
-	const createPropertyHandler = async () => {
+	const createCommentHandler = async () => {
 		try {
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
 			await createComment({ variables: { input: insertCommentData } });
@@ -173,7 +173,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 
 			getCommentsRefetch({ input: commentInquiry });
 		} catch (err: any) {
-			console.log('ERROR, likePropertyHandler', err.message);
+			console.log('ERROR, createCommentHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
@@ -501,7 +501,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 										<Button
 											className={'submit-review'}
 											disabled={insertCommentData.commentContent === '' || user?._id === ''}
-											onClick={createPropertyHandler}
+											onClick={createCommentHandler}
 										>
 											<Typography className={'title'}>Submit Review</Typography>
 											<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">

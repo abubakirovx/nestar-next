@@ -116,7 +116,7 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 			await likeTargetAgent({ variables: { input: id } });
 			await getAgentsRefetch({ input: initialInput });
 		} catch (err: any) {
-			console.log('ERROR, likePropertyHandler', err.message);
+			console.log('ERROR, likeAgentHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
