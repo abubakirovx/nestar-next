@@ -127,7 +127,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 							) : (
 								<div className={'no-data'}>
 									<img src="/img/icons/icoAlert.svg" alt="" />
-									<p>No properties found!</p>
+									<p>No agents found!</p>
 								</div>
 							)}
 						</Stack>
@@ -135,7 +135,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 					<Stack className={'review-box'}>
 						<Stack className={'main-intro'}>
 							<span>Reviews</span>
-							<p>we are glad to see you again</p>
+							<p>We are glad to see you again</p>
 						</Stack>
 						{commentTotal !== 0 && (
 							<Stack className={'review-wrap'}>

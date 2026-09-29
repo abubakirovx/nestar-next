@@ -16,22 +16,25 @@ const TopAgentCard = (props: TopAgentProps) => {
 		: '/img/profile/defaultUser.svg';
 
 	/** HANDLERS **/
+	const pushDetailHandler = async (agentId: string) => {
+		await router.push({ pathname: '/agent/detail/', query: { id: agentId } });
+	};
 
 	if (device === 'mobile') {
 		return (
 			<Stack className="top-agent-card">
-				<img src={agentImage} alt="" />
+				<img onClick={() => pushDetailHandler(agent?._id)} src={agentImage} alt="" />
 
-				<strong>{agent?.memberNick}</strong>
+				<strong onClick={()=>pushDetailHandler(agent?._id)}>{agent?.memberNick}</strong>
 				<span>{agent?.memberType}</span>
 			</Stack>
 		);
 	} else {
 		return (
 			<Stack className="top-agent-card">
-				<img src={agentImage} alt="" />
+				<img onClick={() => pushDetailHandler(agent?._id)} src={agentImage} alt="" />
 
-				<strong>{agent?.memberNick}</strong>
+				<strong onClick={()=>pushDetailHandler(agent?._id)}> {agent?.memberNick}</strong>
 				<span>{agent?.memberType}</span>
 			</Stack>
 		);

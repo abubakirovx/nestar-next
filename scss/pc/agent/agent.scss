@@ -58,9 +58,17 @@
 				width: 100%;
 				min-height: 500px;
 				height: auto;
-				display: flex;
-				flex-direction: row;
-				flex-wrap: wrap;
+				display: grid;
+				grid-template-columns: repeat(5, minmax(0, 1fr));
+				column-gap: 27px;
+				row-gap: 34px;
+				.agent-general-card {
+					min-width: 0;
+					margin: 0;
+					.agent-img {
+						width: 100%;
+					}
+				}
 			}
 			.pagination {
 				display: flex;
