@@ -22,11 +22,14 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 	const user = useReactiveVar(userVar);
 
 	/** HANDLERS **/
-
+	const pushDetailHandler = async (propertyId: string) => {
+		await router.push({ pathname: '/property/detail/', query: { id: propertyId } });
+	};
 	if (device === 'mobile') {
 		return (
 			<Stack className="trend-card-box" key={property._id}>
 				<Box
+					onClick={() => pushDetailHandler(property._id)}
 					component={'div'}
 					className={'card-img'}
 					style={{ backgroundImage: `url(${REACT_APP_API_URL}/${property?.propertyImages[0]})` }}
@@ -34,7 +37,9 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 					<div>${property.propertyPrice}</div>
 				</Box>
 				<Box component={'div'} className={'info'}>
-					<strong className={'title'}>{property.propertyTitle}</strong>
+					<strong onClick={() => pushDetailHandler(property._id)} className={'title'}>
+						{property.propertyTitle}
+					</strong>
 					<p className={'desc'}>{property.propertyDesc ?? 'no description'}</p>
 					<div className={'options'}>
 						<div>
@@ -78,6 +83,7 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 		return (
 			<Stack className="trend-card-box" key={property._id}>
 				<Box
+					onClick={() => pushDetailHandler(property._id)}
 					component={'div'}
 					className={'card-img'}
 					style={{ backgroundImage: `url(${REACT_APP_API_URL}/${property?.propertyImages[0]})` }}
@@ -85,7 +91,9 @@ const TrendPropertyCard = (props: TrendPropertyCardProps) => {
 					<div>${property.propertyPrice}</div>
 				</Box>
 				<Box component={'div'} className={'info'}>
-					<strong className={'title'}>{property.propertyTitle}</strong>
+					<strong onClick={() => pushDetailHandler(property._id)} className={'title'}>
+						{property.propertyTitle}
+					</strong>
 					<p className={'desc'}>{property.propertyDesc ?? 'no description'}</p>
 					<div className={'options'}>
 						<div>
