@@ -64,7 +64,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 				getAgentsPropertiesRefetch({ input: searchFilter });
 			}
 		} catch (err) {
-			sweetErrorHandling(err);
+			sweetErrorHandling(err).then();
 		}
 	};
 
@@ -82,7 +82,7 @@ const MyProperties: NextPage = ({ initialInput, ...props }: any) => {
 				getAgentsPropertiesRefetch({ input: searchFilter });
 			}
 		} catch (err) {
-			sweetErrorHandling(err);
+			sweetErrorHandling(err).then();
 		}
 	};
 

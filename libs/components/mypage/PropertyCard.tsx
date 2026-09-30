@@ -62,7 +62,7 @@ export const PropertyCard = (props: PropertyCardProps) => {
 					<Typography className="name">{property.propertyTitle}</Typography>
 					<Typography className="address">{property.propertyAddress}</Typography>
 					<Typography className="price">
-						<strong>${formatterStr(property?.propertyPrice)}</strong>/ mo
+						<strong>${formatterStr(property?.propertyPrice)}</strong>
 					</Typography>
 				</Stack>
 				<Stack className="date-box">
@@ -118,15 +118,15 @@ export const PropertyCard = (props: PropertyCardProps) => {
 					<Typography className="views">{property.propertyViews.toLocaleString()}</Typography>
 				</Stack>
 				{!memberPage && property.propertyStatus === PropertyStatus.ACTIVE && (
-							<Stack className="action-box">
-								<IconButton className="icon-button" onClick={() => pushEditProperty(property._id)}>
-									<ModeIcon className="buttons" />
-								</IconButton>
-								<IconButton className="icon-button" onClick={() => deletePropertyHandler(property._id)}>
-									<DeleteIcon className="buttons" />
-								</IconButton>
-							</Stack>
-						)}
+					<Stack className="action-box">
+						<IconButton className="icon-button" onClick={() => pushEditProperty(property._id)}>
+							<ModeIcon className="buttons" />
+						</IconButton>
+						<IconButton className="icon-button" onClick={() => deletePropertyHandler(property._id)}>
+							<DeleteIcon className="buttons" />
+						</IconButton>
+					</Stack>
+				)}
 			</Stack>
 		);
 };
