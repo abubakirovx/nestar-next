@@ -36,13 +36,18 @@
 			.favorites-list-box {
 				width: 100%;
 				height: auto;
-				flex-wrap: wrap;
-				flex-direction: row;
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
 				gap: 22px;
+				.no-data {
+					grid-column: 1 / -1;
+				}
 				.card-config {
-					width: 296px;
+					width: 100%;
+					min-width: 0;
+					box-sizing: border-box;
 					height: 413px;
-					margin-bottom: 7px;
+					margin-bottom: 0;
 					border-radius: 12px;
 					background: #fff;
 					box-shadow: 0px 1px 4px 0px rgba(24, 26, 32, 0.07);

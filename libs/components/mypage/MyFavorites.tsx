@@ -5,6 +5,12 @@ import { Pagination, Stack, Typography } from '@mui/material';
 import PropertyCard from '../property/PropertyCard';
 import { Property } from '../../types/property/property';
 import { T } from '../../types/common';
+import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_FAVORITES } from '../../../apollo/user/query';
+import { Message } from '../../enums/common.enum';
+import { sweetMixinErrorAlert } from '../../sweetAlert';
+import { PropertyStatus } from '../../enums/property.enum';
 
 const MyFavorites: NextPage = () => {
 	const device = useDeviceDetect();
@@ -13,10 +19,42 @@ const MyFavorites: NextPage = () => {
 	const [searchFavorites, setSearchFavorites] = useState<T>({ page: 1, limit: 6 });
 
 	/** APOLLO REQUESTS **/
+	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+
+	const {
+		loading: getFavoritesLoading,
+		error: getFavoritesError,
+		data: getFavoritesData,
+		refetch: getFavoritesRefetch,
+	} = useQuery(GET_FAVORITES, {
+		fetchPolicy: 'network-only',
+		variables: { input: searchFavorites },
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setMyFavorites(
+				(data?.getFavoriteProperties?.list ?? []).filter(
+					(property: Property) => property.propertyStatus !== PropertyStatus.DELETE,
+				),
+			);
+			setTotal(data?.getFavoriteProperties?.metaCounter?.[0]?.total ?? 0);
+		},
+	});
 
 	/** HANDLERS **/
 	const paginationHandler = (e: T, value: number) => {
 		setSearchFavorites({ ...searchFavorites, page: value });
+	};
+
+	const likePropertyHandler = async (user: T, id: string) => {
+		try {
+			if (!id) return;
+			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
+			await likeTargetProperty({ variables: { input: id } });
+			await getFavoritesRefetch({ input: searchFavorites });
+		} catch (err: any) {
+			console.log('ERROR, likePropertyHandler', err.message);
+			sweetMixinErrorAlert(err.message).then();
+		}
 	};
 
 	if (device === 'mobile') {
@@ -31,9 +69,11 @@ const MyFavorites: NextPage = () => {
 					</Stack>
 				</Stack>
 				<Stack className="favorites-list-box">
-					{myFavorites?.length ? (
+					{getFavoritesLoading && myFavorites.length === 0 ? (
+						<div className="no-data">Loading favorites...</div>
+					) : myFavorites?.length ? (
 						myFavorites?.map((property: Property) => {
-							return <PropertyCard property={property} myFavorites={true} />;
+							return <PropertyCard key={property._id} likePropertyHandler={likePropertyHandler} property={property} myFavorites={true} />;
 						})
 					) : (
 						<div className={'no-data'}>

@@ -234,8 +234,8 @@ export const GET_AGENT_PROPERTIES = gql`
 `;
 
 export const GET_FAVORITES = gql`
-	query GetFavorites($input: OrdinaryInquiry!) {
-		getFavorites(input: $input) {
+	query GetFavoriteProperties($input: OrdinaryInquiry!) {
+		getFavoriteProperties(input: $input) {
 			list {
 				_id
 				propertyType
@@ -297,8 +297,8 @@ export const GET_FAVORITES = gql`
 `;
 
 export const GET_VISITED = gql`
-	query GetVisited($input: OrdinaryInquiry!) {
-		getVisited(input: $input) {
+	query GetVisitedProperties($input: OrdinaryInquiry!) {
+		getVisitedProperties(input: $input) {
 			list {
 				_id
 				propertyType
