@@ -110,9 +110,9 @@ const AdminProperties: NextPage = ({ initialInquiry, ...props }: any) => {
 						input: id,
 					},
 				});
-				await getAllPropertiesByAdminRefetch({ input: propertiesInquiry }).then();
 			}
 			menuIconCloseHandler();
+			await getAllPropertiesByAdminRefetch({ input: propertiesInquiry }).then();
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
 		}

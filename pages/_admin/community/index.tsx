@@ -14,6 +14,10 @@ import { BoardArticle } from '../../../libs/types/board-article/board-article';
 import { BoardArticleCategory, BoardArticleStatus } from '../../../libs/enums/board-article.enum';
 import { sweetConfirmAlert, sweetErrorHandling } from '../../../libs/sweetAlert';
 import { BoardArticleUpdate } from '../../../libs/types/board-article/board-article.update';
+import { UPDATE_BOARD_ARTICLE_BY_ADMIN, REMOVE_BOARD_ARTICLE_BY_ADMIN } from '../../../apollo/admin/mutation';
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_ALL_BOARD_ARTICLES_BY_ADMIN } from '../../../apollo/admin/query';
+import { T } from '../../../libs/types/common';
 
 const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [anchorEl, setAnchorEl] = useState<any>([]);
@@ -26,19 +30,44 @@ const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [searchType, setSearchType] = useState('ALL');
 
 	/** APOLLO REQUESTS **/
+	const [updateBoardArticleByAdmin] = useMutation(UPDATE_BOARD_ARTICLE_BY_ADMIN);
+	const [removeBoardArticleByAdmin] = useMutation(REMOVE_BOARD_ARTICLE_BY_ADMIN);
+
+	const {
+		loading: getAllArticlesByAdminLoading,
+		error: geAllArticlesByAdminError,
+		data: getAllArticlesByAdminData,
+		refetch: getAllArticlesByAdminRefetch,
+	} = useQuery(GET_ALL_BOARD_ARTICLES_BY_ADMIN, {
+		fetchPolicy: 'network-only',
+		variables: {
+			input: communityInquiry,
+		},
+		notifyOnNetworkStatusChange: true,
+		onCompleted: (data: T) => {
+			setArticles(data?.getAllBoardArticlesByAdmin?.list);
+			setArticleTotal(data?.getAllBoardArticlesByAdmin?.metaCounter[0]?.total ?? 0);
+		},
+	});
 
 	/** LIFECYCLES **/
-	useEffect(() => {}, [communityInquiry]);
+	useEffect(() => {
+		getAllArticlesByAdminRefetch({ input: communityInquiry }).then();
+	}, [communityInquiry]);
 
 	/** HANDLERS **/
 	const changePageHandler = async (event: unknown, newPage: number) => {
 		communityInquiry.page = newPage + 1;
+		await getAllArticlesByAdminRefetch({ input: communityInquiry }).then();
+
 		setCommunityInquiry({ ...communityInquiry });
 	};
 
 	const changeRowsPerPageHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		communityInquiry.limit = parseInt(event.target.value, 10);
 		communityInquiry.page = 1;
+		await getAllArticlesByAdminRefetch({ input: communityInquiry }).then();
+
 		setCommunityInquiry({ ...communityInquiry });
 	};
 
@@ -96,9 +125,15 @@ const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 
 	const updateArticleHandler = async (updateData: BoardArticleUpdate) => {
 		try {
+			await updateBoardArticleByAdmin({
+				variables: {
+					input: updateData,
+				},
+			});
 			console.log('+updateData: ', updateData);
 
 			menuIconCloseHandler();
+			await getAllArticlesByAdminRefetch({ input: communityInquiry }).then();
 		} catch (err: any) {
 			menuIconCloseHandler();
 			sweetErrorHandling(err).then();
@@ -107,8 +142,14 @@ const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 
 	const removeArticleHandler = async (id: string) => {
 		try {
-			if (await sweetConfirmAlert('are you sure to remove?')) {
+			if (await sweetConfirmAlert('Are you sure to remove?')) {
+				await removeBoardArticleByAdmin({
+					variables: {
+						input: id,
+					},
+				});
 			}
+			await getAllArticlesByAdminRefetch({ input: communityInquiry }).then();
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
 		}
