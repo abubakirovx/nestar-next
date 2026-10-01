@@ -65,6 +65,18 @@ const Community: NextPage = ({ initialInput, ...props }: T) => {
 	}, []);
 
 	/** HANDLERS **/
+	const likeBoardArticleHandler = async (e: any, user: T, id: string) => {
+		try {
+			e.stopPropagation();
+			if (!id) return;
+			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
+			await likeTargetBoardArticle({ variables: { input: id } });
+			await getBoardArticlesRefetch({ input: searchCommunity });
+		} catch (err: any) {
+			console.log('ERROR, likeBoardArticleHandler', err.message);
+			sweetMixinErrorAlert(err.message).then();
+		}
+	};
 	const tabChangeHandler = async (e: T, value: string) => {
 		console.log(value);
 
@@ -83,18 +95,6 @@ const Community: NextPage = ({ initialInput, ...props }: T) => {
 		setSearchCommunity({ ...searchCommunity, page: value });
 	};
 
-	const likeBoardArticleHandler = async (e: any, user: T, id: string) => {
-		try {
-			e.stopPropagation();
-			if (!id) return;
-			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			await likeTargetBoardArticle({ variables: { input: id } });
-			await getBoardArticlesRefetch({ input: searchCommunity });
-		} catch (err: any) {
-			console.log('ERROR, likeBoardArticleHandler', err.message);
-			sweetMixinErrorAlert(err.message).then();
-		}
-	};
 
 	if (device === 'mobile') {
 		return <h1>COMMUNITY PAGE MOBILE</h1>;
