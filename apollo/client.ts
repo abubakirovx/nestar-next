@@ -46,6 +46,29 @@ function createIsomorphicLink() {
 			uri: process.env.REACT_APP_API_GRAPHQL_URL,
 		});
 
+		class LoggingWebSocket {
+			private socket: WebSocket;
+			constructor(url: string) {
+				this.socket = new WebSocket(url);
+
+				this.socket.onopen = () => {
+					console.log('WebSocket Connection!');
+				};
+				this.socket.onmessage = (msg) => {
+					console.log('WebSocket Message :', msg.data);
+				};
+				this.socket.onerror = (error) => {
+					console.log('WebSocket Error :', error);
+				};
+			}
+			send(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView) {
+				this.socket.send(data);
+			}
+			close() {
+				this.socket.close();
+			}
+		}
+
 		/* WEBSOCKET SUBSCRIPTION LINK */
 		const wsLink = new WebSocketLink({
 			uri: process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007',
@@ -56,6 +79,7 @@ function createIsomorphicLink() {
 					return { headers: getHeaders() };
 				},
 			},
+			webSocketImpl: LoggingWebSocket,
 		});
 
 		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
