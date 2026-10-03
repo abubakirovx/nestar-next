@@ -1,6 +1,6 @@
 import decodeJWT from 'jwt-decode';
 import { initializeApollo } from '../../apollo/client';
-import { userVar } from '../../apollo/store';
+import { socketVar, userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
 import { sweetMixinErrorAlert } from '../sweetAlert';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
@@ -119,6 +119,11 @@ const requestSignUpJwtToken = async ({
 
 export const updateStorage = ({ jwtToken }: { jwtToken: any }) => {
 	setJwtToken(jwtToken);
+	const socket = socketVar();
+	if (socket) {
+		socket.close();
+		socketVar(new WebSocket(`${process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007'}?token=${jwtToken}`));
+	}
 	window.localStorage.setItem('login', Date.now().toString());
 };
 
